@@ -1,0 +1,78 @@
+<?php
+require_once 'class/deal.php';
+require_once 'PHPUnit/Autoload.php';
+
+
+/**
+ * Test Class for Deal 
+ */
+class dealTest extends PHPUnit_Framework_TestCase {
+
+    protected $dealer;
+    protected $originalDeck;
+    protected $shuffledDeck;
+
+    public function __construct() {
+        parent::__construct();
+        $this->dealer = new Deal();
+        $this->originalDeck = $this->dealer->getDeck();
+    }
+    
+    public function testDealClass() {
+        $this->assertMethodExist($this->dealer, 'getDeck');
+        $this->assertMethodExist($this->dealer, 'setDeck');
+        $this->assertMethodExist($this->dealer, 'getCardtypes');
+        $this->assertMethodExist($this->dealer, 'getCards');
+        $this->assertMethodExist($this->dealer, 'generateDeck');
+        $this->assertMethodExist($this->dealer, 'shuffleCards');
+        $this->assertMethodExist($this->dealer, 'dealCards');
+        $this->assertMethodExist($this->dealer, 'dealHand');
+        $this->assertMethodExist($this->dealer, 'getHands');
+        $this->assertMethodExist($this->dealer, 'getDealedCardNr');
+        $this->assertMethodExist($this->dealer, 'countDeck');
+        $this->assertMethodExist($this->dealer, 'printCards');
+    }
+        
+    public function testDeckNr() {
+        $this->assertEquals( 52, count($this->dealer->getDeck()));
+        $this->assertEquals( 52, $this->dealer->countDeck());
+    }
+    
+    public function testShuffle() {
+        $this->shuffledDeck = $this->dealer->shuffleCards()->getDeck();
+        $deckDiff = array_diff($this->originalDeck, $this->shuffledDeck);
+        $this->assertCount(0, $deckDiff);
+        $deckIs = array_intersect($this->originalDeck, $this->shuffledDeck);
+        $this->assertCount(52, $deckIs);
+        $this->assertFalse(
+                implode(' ', $this->originalDeck) ===  
+                implode(' ', $this->shuffledDeck)
+                );
+    }
+    
+    public function testDeal() {
+        $this->dealer->dealCards();
+        $hands = $this->dealer->getHands();
+        $this->assertCount(4, $hands);
+        $dealerDeck = $this->dealer->getDeck();
+        foreach ($hands as $hand) {
+            $this->assertCount(7, $hand);
+            $this->assertCount(0, array_intersect($hand, $dealerDeck));
+        }
+        $this->assertCount(24, $this->dealer->getDeck());
+    }
+
+    /**
+    * Assert that a class has a method 
+    *
+    * @param string $class name of the class
+    * @param string $method name of the searched method
+    * @throws ReflectionException if $class don't exist
+    * @throws PHPUnit_Framework_ExpectationFailedException if a method isn't found
+    */
+   protected function assertMethodExist($class, $method) {
+       $oReflectionClass = new ReflectionClass($class); 
+       $this->assertTrue($oReflectionClass->hasMethod($method));
+   }
+    
+}

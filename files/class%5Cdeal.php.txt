@@ -1,0 +1,165 @@
+<?php
+
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+
+/**
+ * Description of deal
+ *
+ * @author Zoltan Nagy
+ */
+require_once 'abstract/cards.php';
+require_once 'dealexception.php';
+
+class Deal extends Cards {
+
+    /**
+     *
+     * @var type 
+     */
+    protected $_hands = array();
+    public $shuffle = 10;
+    protected $_players = array('Player 1', 'Player 2', 'Player 3', 'Player 4');
+    protected $_dealedCards;
+
+    public function __construct($deal = FALSE, $print = FALSE) {
+        parent::__construct();
+        
+        try {
+            ($deal) ? $this->dealCards($print) : '';
+        } catch (DealException $exc) {
+            echo 'Sorry can\'t deal';
+        } catch (Exception $exc){
+            echo 'The Desk is closed';
+        }
+
+        
+    }
+    
+    /**
+     * We will shuffle the pack 10 times for good measures!
+     * @return \deal
+     */
+    public function shuffleCards($deck = array()) {
+        if(count($deck) == 0){
+            $deck = $this->getDeck();
+        }
+        for ($i = 0; $i != 100; $i++) {
+            mt_srand((double) microtime() * 1000000);
+            $offset = mt_rand(10, 40);
+            //First we will split our deck cards:
+            $sliced_cards[0] = array_slice($deck, 0, $offset);
+            $sliced_cards[1] = array_slice($deck, $offset, 52);
+
+            //Then Shuffle Eeach
+            shuffle($sliced_cards[0]);
+            shuffle($sliced_cards[1]);
+
+            //Reverse each pile
+            $sliced_cards[0] = array_reverse($sliced_cards[0]);
+            $sliced_cards[1] = array_reverse($sliced_cards[1]);
+
+            //Re-Shuffle
+            shuffle($sliced_cards[0]);
+            shuffle($sliced_cards[1]);
+
+            //Merge both stacks
+            $unsliced = array_merge($sliced_cards[0], $sliced_cards[1]);
+
+            //And another shuffle
+            shuffle($unsliced);
+
+            //Add in a flip
+            array_flip($unsliced);
+        }
+        $this->setDeck($unsliced);
+
+        return $this;
+    }
+
+    /**
+     * deal 4 hands of 7 cards 
+     * @param bool $print
+     * @param bool $shuffle
+     * @return \deal
+     */
+    public function dealCards($print = FALSE, $shuffle = TRUE) {
+        if($shuffle){
+            $this->shuffleCards();
+        }
+        try {
+            
+        } catch (Exception $exc) {
+            throw new DealException;
+        }
+
+        $this->_dealedCards = $this->dealHand(7, $this->_players);
+        if($print){
+            $this->printCards();
+        }
+        return $this;
+    }
+
+    /**
+     * deal number of cards for each hand, returns number of cards dealed
+     * one card for each player on one round
+     * @param int $cardnr
+     * @param array $keys
+     * @param array $deck
+     * @return int $dealed_card_nr
+     */
+    protected function dealHand($cardnr, array $keys) {
+        $dealed_card_nr = 0;
+        for ($i = 1; $i <= $cardnr; $i++) {
+            foreach ($keys as $player) {
+                $this->_hands[$player][$i] = array_pop($this->_deck);
+                $dealed_card_nr ++;
+            }
+        }
+        return $dealed_card_nr;
+    }
+
+    /**
+     * get the cards on hands
+     * @return array
+     */
+    public function getHands() {
+        return $this->_hands;
+    }
+
+    /**
+     * get the Nr. of gealed cards
+     * @return int
+     */
+    public function getDealedCardNr() {
+        return $this->_dealedCards;
+    }
+    
+    /**
+     * get number of cards on the current deck in game
+     * @return int
+     */
+    public function countDeck() {
+        return count($this->_deck);
+    }
+                
+    /**
+     * print the cards on all hands
+     * @param array $hands
+     * @return \deal
+     */
+    public function printCards(array $hands=NULL) {
+        if($hands === NULL){
+            $hands = $this->getHands();
+        }
+        foreach ($hands as $playername => $hand) {
+            print $playername . ': ' . implode(' - ', $hand).PHP_EOL;            
+        }
+        return $this;
+    }
+
+}
+

@@ -1,0 +1,78 @@
+<?php
+
+/* 
+ * 
+ */
+
+abstract class Cards {
+    
+    /**
+     * @var _deck array - deck of cards 
+     */
+    protected $_deck = array();
+    
+    public function __construct() {
+        $this->generateDeck();
+    }
+
+
+    /**
+     * get the deck of cards, generate new if none or reset
+     * @param bool $reset
+     * @return array
+     */
+    public function getDeck(){
+        if(count($this->_deck) == 0){
+            $this->setDeck();
+        }
+        return $this->_deck;
+    }
+    
+    /**
+     * set the current deck of cards with a predefined deck
+     * @param array $deck
+     * @return \cards
+     */
+    protected function setDeck(array $deck = NULL) {
+        if($deck === NULL){
+            $this->generateDeck();
+        } else {
+            $this->_deck = $deck;
+        }
+        return $this;
+    }
+    
+    /**
+     * get card types ('Heart', 'Club', 'Diamond', 'Spade')
+     * @return array
+     */
+    protected function getCardTypes() {
+        //return array('Heart', 'Club', 'Diamond', 'Spade');
+        return array('H', 'C', 'D', 'S');
+    }
+    
+    /**
+     * get cards of the types
+     * ('Ace', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten', 'Jack', 'Queen', 'King')
+     * @return array
+     */
+    protected function getCards() {
+        //return array('Ace', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten', 'Jack', 'Queen', 'King');
+        return array('A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K');
+    }
+    
+    /**
+     * generate the cards deck from cardtypes and cards
+     * set the $this->deck array count 52 cards
+     * @return \cards
+     */
+    protected function generateDeck() {
+        $cards = $this->getCards();
+        foreach ($this->getCardTypes() as $type) {
+            foreach ($cards as $card) {
+                $this->_deck[] = $type.' '.$card;
+            }
+        }
+        return $this;
+    }
+}
